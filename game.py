@@ -1,22 +1,40 @@
 from table import Table
 from cell_type import CellType
 from game_status import GameStatus
+from settings import Settings
 
 
 class Game:
     can_row = []
     can_col = []
 
-    def __init__(self, level: list[list[int]]):
+    def __init__(self, level: list[list[int]], settings: Settings):
         self.level = level
         self.status = GameStatus.PLAYING
         self.table = Table(level)
+        self.settings = settings
         self.table.cellClicked.connect(self.event)
-        self.table.set_size(50)
+        self.table.set_size(self.settings.get_size())
+        self.score = 0
         self.table.show_table()
 
-    def get_table(self):
+    def restart(self):
+        self.table = Table(self.level)
+        self.table.cellClicked.connect(self.event)
+        self.table.set_size(self.settings.get_size())
+        self.table.show_table()
+        self.score = 0
+        self.status = GameStatus.PLAYING
+
+    def change_settings(self):
+        self.table.set_size(self.settings.get_size())
+        self.table.show_table()
+
+    def get_table(self) -> Table:
         return self.table
+
+    def get_score(self) -> int:
+        return self.score
 
     def remove_can(self):
         for i in range(len(self.can_row)):
@@ -29,25 +47,25 @@ class Game:
         table: list[list[CellType]] = self.table.table.copy()
         if row < len(table) - 2:  # down check
             if ((table[row + 2][col] == CellType.EMPTY or
-                    table[row + 2][col] == CellType.CAN) and
+                 table[row + 2][col] == CellType.CAN) and
                     table[row + 1][col] == CellType.BLOCK):
                 can.append((row + 2, col))
 
         if row > 1:  # up check
             if ((table[row - 2][col] == CellType.EMPTY or
-                    table[row - 2][col] == CellType.CAN) and
+                 table[row - 2][col] == CellType.CAN) and
                     table[row - 1][col] == CellType.BLOCK):
                 can.append((row - 2, col))
 
-        if col < len(table[0]) - 2: # right check
+        if col < len(table[0]) - 2:  # right check
             if ((table[row][col + 2] == CellType.EMPTY or
-                    table[row][col + 2] == CellType.CAN) and
+                 table[row][col + 2] == CellType.CAN) and
                     table[row][col + 1] == CellType.BLOCK):
                 can.append((row, col + 2))
 
         if col > 1:  # left check
             if ((table[row][col - 2] == CellType.EMPTY or
-                    table[row][col - 2] == CellType.CAN) and
+                 table[row][col - 2] == CellType.CAN) and
                     table[row][col - 1] == CellType.BLOCK):
                 can.append((row, col - 2))
 
@@ -58,12 +76,9 @@ class Game:
             return False
         if self.check_win():
             self.status = GameStatus.WIN
-            print("You win!")
             return True
         if self.check_lose():
             self.status = GameStatus.LOSE
-            print("Looser!")
-
             return True
 
     def event(self, row, col):
@@ -90,6 +105,7 @@ class Game:
                 selected_row, selected_col = self.table.get_selected()
                 self.table.remove_selected()
                 self.table.set_empty(selected_row, selected_col)
+                self.score += self.settings.get_score()
             case CellType.SELECTED:
                 self.table.remove_selected()
                 self.remove_can()

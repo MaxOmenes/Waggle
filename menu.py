@@ -9,6 +9,7 @@ class Menu(QMenuBar):
         self.menu = self.addMenu('Menu')
         self.menu.addAction('Load Level')
         self.menu.addAction('Restart Level')
+        self.menu.addAction('Settings')
         self.menu.addAction('Exit')
         self.menu.triggered.connect(self.menu_event)
 
@@ -17,8 +18,9 @@ class Menu(QMenuBar):
             case 'Load Level':
                 self.screen.load_level()
             case 'Restart Level':
-                self.screen.layout.removeWidget(self.screen.table)
-                self.screen.table = ui.Table(self.screen.level)
-                self.screen.layout.addWidget(self.screen.table)
+                self.screen.restart()
+            case 'Settings':
+                settings = ui.SettingsForm(self.screen)
+                settings.show()
             case 'Exit':
                 self.screen.close()
