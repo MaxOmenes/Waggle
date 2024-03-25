@@ -2,14 +2,15 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QMainWindow, QPushButton, QFil
 from table import Table
 from menu import Menu
 import json
+from game import Game
 
 
 class UiForm(QMainWindow):
     def __init__(self):
         super().__init__()
         menu = Menu(self)
-        self.level = None
         self.table = None
+        self.game = None
         self.layout = QVBoxLayout()
         self.setMenuBar(menu)
         widget = QWidget()
@@ -23,9 +24,9 @@ class UiForm(QMainWindow):
 
         file_name = dialog.selectedFiles()[0]
         json_file = open(file_name)  # open file dialog
-        self.level = json.load(json_file)
+        level = json.load(json_file)
         json_file.close()
 
-        self.table = Table(self.level)
-        self.table.show_table()
-        self.layout.addWidget(self.table)
+        self.game = Game(level)
+
+        self.layout.addWidget(self.game.get_table())
