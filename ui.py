@@ -1,17 +1,31 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QMainWindow, QTableWidget
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QMainWindow, QPushButton, QFileDialog
 from table import Table
+from menu import Menu
+import json
 
 
 class UiForm(QMainWindow):
     def __init__(self):
         super().__init__()
-        layout = QVBoxLayout()
-        table = Table([[0, 1, 2], [1, 2, 0], [2, 0, 1]])
-        table.show_table()
-        layout.addWidget(table)
+        menu = Menu(self)
+        self.level = None
+        self.table = None
+        self.layout = QVBoxLayout()
+        self.setMenuBar(menu)
         widget = QWidget()
-        widget.setLayout(layout)
+        widget.setLayout(self.layout)
         self.setCentralWidget(widget)
 
     def load_level(self):
-        pass
+        dialog = QFileDialog()
+        dialog.setNameFilter('JSON files (*.json)')
+        dialog.exec()
+
+        file_name = dialog.selectedFiles()[0]
+        json_file = open(file_name)  # open file dialog
+        self.level = json.load(json_file)
+        json_file.close()
+
+        self.table = Table(self.level)
+        self.table.show_table()
+        self.layout.addWidget(self.table)
